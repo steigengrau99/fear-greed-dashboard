@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Market Sentiment Dashboard</title>
+</head>
+<body>
+  <h1>Fear & Greed Index</h1>
+
+  <h2 id="score">Loading...</h2>
+  <p id="rating"></p>
+  <p id="history"></p>
+  <small id="updated"></small>
+
+  <script>
+    fetch("fear_greed.json")
+      .then(res => res.json())
+      .then(d => {
+        document.getElementById("score").innerText =
+          `Score: ${d.score}`;
+
+        document.getElementById("rating").innerText =
+          `Current sentiment: ${d.rating}`;
+
+        document.getElementById("history").innerText =
+          `Previous close: ${d.previous_close}
+           | 1 week ago: ${d.one_week_ago}
+           | 1 month ago: ${d.one_month_ago}`;
+
+        document.getElementById("updated").innerText =
+          `Last updated: ${d.timestamp}`;
+      });
+  </script>
+</body>
+</html>

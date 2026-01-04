@@ -170,6 +170,31 @@ fetch("fear_greed.json?v=" + Date.now())
     document.getElementById("label").innerText = "Data unavailable";
   });
 </script>
+<div class="card">
+  <h3>📱 App Rankings</h3>
+  <p id="coinbase-ios">Coinbase iOS: loading…</p>
+  <p id="coinbase-android">Coinbase Android: loading…</p>
+  <p id="robinhood-ios">Robinhood iOS: loading…</p>
+  <p id="robinhood-android">Robinhood Android: loading…</p>
+</div>
 
+<script>
+fetch("app_rankings.json?v=" + Date.now())
+  .then(r => r.json())
+  .then(data => {
+    const apps = ["Coinbase", "Robinhood"];
+    const platforms = ["ios","android"];
+
+    apps.forEach(app => {
+      platforms.forEach(p => {
+        const latest = [...data].reverse().find(d => d.platform===p && d.app===app);
+        const text = latest ? (latest.rank ?? "N/A") : "N/A";
+        document.getElementById(`${app.toLowerCase()}-${p}`).innerText =
+          `${app} ${p.toUpperCase()}: ${text}`;
+      });
+    });
+  })
+  .catch(() => console.log("App rankings data unavailable"));
+</script>
 </body>
 </html>

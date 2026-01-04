@@ -1,200 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Crypto Market Sentiment</title>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-:root {
-  --bg: #000000;
-  --panel: #0f0f0f;
-  --text: #f5f5f5;
-  --muted: #9ca3af;
-  --accent: #ff9900;   /* Bloomberg orange */
-  --cyan: #00e5ff;
-}
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-.container {
-  max-width: 1000px;
-  margin: 40px auto;
-  padding: 20px;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.title {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: var(--accent);
-}
-
-.timestamp {
-  font-size: 0.9rem;
-  color: var(--muted);
-}
-
-.card {
-  background: var(--panel);
-  border-radius: 12px;
-  padding: 30px;
-  margin-top: 25px;
-}
-
-.value {
-  font-size: 4.5rem;
-  font-weight: bold;
-  color: var(--cyan);
-}
-
-.label {
-  font-size: 1.4rem;
-  margin-top: 6px;
-}
-
-.delta {
-  margin-top: 10px;
-  font-size: 1rem;
-  color: var(--accent);
-}
-
-.footer {
-  text-align: center;
-  font-size: 0.85rem;
-  color: var(--muted);
-  margin-top: 35px;
-}
-
-canvas {
-  margin-top: 30px;
-}
-</style>
+  <meta charset="UTF-8">
+  <title>Crypto Fear & Greed Index</title>
 </head>
-
 <body>
-<div class="container">
+  <h1>📊 Crypto Fear & Greed Index</h1>
+  <p id="status">Loading…</p>
 
-  <div class="header">
-    <div class="title">📊 Crypto Market Sentiment</div>
-    <div class="timestamp" id="updated">Loading…</div>
-  </div>
-
-  <div class="card">
-    <div class="value" id="value">—</div>
-    <div class="label" id="label">Loading…</div>
-    <div class="delta" id="delta"></div>
-  </div>
-
-  <div class="card">
-    <canvas id="chart"></canvas>
-  </div>
-
-  <div class="footer">
-    Data as of UTC • Source: Alternative.me • Auto-updated daily
-  </div>
-
-</div>
-
-<script>
-fetch("fear_greed.json?v=" + Date.now())
-  .then(res => res.json())
-  .then(data => {
-    const latest = data[data.length - 1];
-    const prev = data.length > 1 ? data[data.length - 2] : null;
-
-    const value = Number(latest.value);
-    const label = latest.value_classification;
-    const tsUTC = new Date(latest.timestamp * 1000).toUTCString();
-
-    document.getElementById("value").innerText = value;
-    document.getElementById("label").innerText = label;
-    document.getElementById("updated").innerText = `Updated: ${tsUTC}`;
-
-    if (prev) {
-      const diff = value - Number(prev.value);
-      const sign = diff > 0 ? "+" : "";
-      document.getElementById("delta").innerText =
-        `Δ vs yesterday: ${sign}${diff}`;
-    }
-
-    // Chart
-    const labels = data.map(d =>
-      new Date(d.timestamp * 1000).toISOString().slice(0, 10)
-    );
-    const values = data.map(d => Number(d.value));
-
-    new Chart(document.getElementById("chart"), {
-      type: "line",
-      data: {
-        labels,
-        datasets: [{
-          label: "Fear & Greed Index",
-          data: values,
-          borderColor: "#ff9900",
-          backgroundColor: "rgba(255,153,0,0.1)",
-          tension: 0.25,
-          pointRadius: 2
-        }]
-      },
-      options: {
-        plugins: {
-          legend: { labels: { color: "#f5f5f5" } }
-        },
-        scales: {
-          x: { ticks: { color: "#9ca3af" } },
-          y: {
-            min: 0,
-            max: 100,
-            ticks: { color: "#9ca3af" }
-          }
-        }
-      }
-    });
-  })
-  .catch(err => {
-    console.error(err);
-    document.getElementById("label").innerText = "Data unavailable";
-  });
-</script>
-<div class="card">
-  <h3>📱 App Rankings</h3>
-  <p id="coinbase-ios">Coinbase iOS: loading…</p>
-  <p id="coinbase-android">Coinbase Android: loading…</p>
-  <p id="robinhood-ios">Robinhood iOS: loading…</p>
-  <p id="robinhood-android">Robinhood Android: loading…</p>
-</div>
-
-<script>
-fetch("app_rankings.json?v=" + Date.now())
-  .then(r => r.json())
-  .then(data => {
-    const apps = ["Coinbase", "Robinhood"];
-    const platforms = ["ios","android"];
-
-    apps.forEach(app => {
-      platforms.forEach(p => {
-        const latest = [...data].reverse().find(d => d.platform===p && d.app===app);
-        const text = latest ? (latest.rank ?? "N/A") : "N/A";
-        document.getElementById(`${app.toLowerCase()}-${p}`).innerText =
-          `${app} ${p.toUpperCase()}: ${text}`;
+  <script>
+    fetch("fear_greed.json")
+      .then(res => {
+        if (!res.ok) throw new Error("JSON not found");
+        return res.json();
+      })
+      .then(data => {
+        const latest = data[data.length - 1];
+        document.getElementById("status").innerText =
+          `Value: ${latest.value} (${latest.value_classification})`;
+      })
+      .catch(err => {
+        document.getElementById("status").innerText =
+          "Error loading data";
+        console.error(err);
       });
-    });
-  })
-  .catch(() => console.log("App rankings data unavailable"));
-</script>
+  </script>
 </body>
 </html>

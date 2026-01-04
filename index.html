@@ -95,7 +95,7 @@ body {
 </div>
 
 <script>
-fetch("fear_greed.json")
+fetch("fear_greed.json?v=" + Date.now())
   .then(res => res.json())
   .then(data => {
     const latest = data[data.length - 1];

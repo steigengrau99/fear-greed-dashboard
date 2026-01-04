@@ -1,60 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Fear & Greed Dashboard</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <title>Crypto Fear & Greed Index</title>
 </head>
 <body>
-
-<div class="container">
   <h1>📊 Crypto Fear & Greed Index</h1>
+  <p id="status">Loading…</p>
 
-  <div class="card">
-    <div id="value" class="value">Loading…</div>
-    <div id="label" class="label"></div>
-    <div id="updated" class="updated"></div>
-  </div>
-
-  <div class="card">
-    <canvas id="historyChart"></canvas>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-fetch("fear_greed.json")
-  .then(res => res.json())
-  .then(history => {
-    const latest = history[history.length - 1];
-
-    document.getElementById("value").textContent = latest.value;
-    document.getElementById("label").textContent = latest.value_classification;
-    document.getElementById("updated").textContent =
-      "Updated: " + new Date(latest.timestamp * 1000).toLocaleString();
-
-    const ctx = document.getElementById("historyChart");
-
-    new Chart(ctx, {
-      type: "line",
-      data: {
-        labels: history.map(d =>
-          new Date(d.timestamp * 1000).toLocaleDateString()
-        ),
-        datasets: [{
-          label: "Fear & Greed Index",
-          data: history.map(d => d.value),
-          tension: 0.3
-        }]
-      },
-      options: {
-        scales: {
-          y: { min: 0, max: 100 }
-        }
-      }
-    });
-  });
-</script>
-
+  <script>
+    fetch("fear_greed.json")
+      .then(res => {
+        if (!res.ok) throw new Error("JSON not found");
+        return res.json();
+      })
+      .then(data => {
+        const latest = data[data.length - 1];
+        document.getElementById("status").innerText =
+          `Value: ${latest.value} (${latest.value_classification})`;
+      })
+      .catch(err => {
+        document.getElementById("status").innerText =
+          "Error loading data";
+        console.error(err);
+      });
+  </script>
 </body>
 </html>
